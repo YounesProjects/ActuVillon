@@ -3,10 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ActuVillon</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>Redirection en cours...</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .message {
+      font-size: 20px;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-  <h1>Bienvenue sur ActuVillon !</h1>
+  <div class="message">Vous allez être redirigé vers le blog dans quelques instants...</div>
+
+  <script>
+    // Redirection vers la page du blog après 4 secondes
+    setTimeout(() => {
+      window.location.href = '/'; // Remplacez '/' par l'URL de votre page de blog
+    }, 4000);
+  </script>
 </body>
 </html>
