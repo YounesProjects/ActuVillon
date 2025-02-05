@@ -42,15 +42,20 @@
       <!-- Champ Identifiant (en lecture seule) -->
       <label for="userId">Identifiant :</label>
       <input type="text" id="userId" name="userId" value="<%= user._id %>" readonly>
-    </br></br>
-      <!-- Champ Photo de Profil -->
+    </br>
+  </br>
+  <!-- Champ Photo de Profil -->
       <label for="profilePicture">Photo de Profil :</label>
       <input type="file" id="profilePicture" name="profilePicture">
-    </br></br>
+    </br>
+  </br>
+
       <!-- Champ Pseudo -->
       <label for="nickname">Pseudo :</label>
       <input type="text" id="nickname" name="nickname" placeholder="Entrez votre pseudo" value="<%= user.username %>">
-    </br></br>
+    </br>
+  </br>
+
       <button type="submit">Enregistrer les Changements</button>
     </form>
   </div>
