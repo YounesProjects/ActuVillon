@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier le Rôle d'un Utilisateur - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>ActuVillon</h1>
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <a href="/logout">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container update-role">
+    <h2>Modifier le Rôle d'un Utilisateur</h2>
+    <form id="updateUserRoleForm" class="centered-form">
+      <input type="text" name="userId" placeholder="ID de l'utilisateur" required>
+      <label>
+        <input type="checkbox" name="isAdmin"> Rendre Admin
+      </label>
+      <button type="submit">Mettre à jour</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('updateUserRoleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      data.isAdmin = data.isAdmin === 'on'; // Convert checkbox value to boolean
+
+      const response = await fetch(`/admin/users/${data.userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message);
+      } else {
+        alert(result.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personnalisation du Profil - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <% if (user && user.profilePicture) { %>
+        <a href="/user">
+          <img src="<%= user.profilePicture %>" alt="Photo de Profil" class="user-logo">
+        </a>
+      <% } else { %>
+        <a href="/login">
+          <img src="/images/default-avatar.png" alt="Avatar par Défaut" class="user-logo">
+        </a>
+      <% } %>
+    </div>
+
+    <h1>ActuVillon</h1>
+
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <% if (user) { %>
+        <a href="/logout">Déconnexion</a>
+        <% if (user.isAdmin) { %>
+          <a href="/admin">Créer un Post</a>
+        <% } %>
+      <% } else { %>
+        <a href="/register">Inscription</a>
+        <a href="/login">Connexion</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <div class="container user-customization">
+    <h2>Personnalisation du Profil</h2>
+    <form id="updateProfileForm" enctype="multipart/form-data">
+      <!-- Champ Identifiant (en lecture seule) -->
+      <label for="userId">Identifiant :</label>
+      <input type="text" id="userId" name="userId" value="<%= user._id %>" readonly>
+    </br></br>
+      <!-- Champ Photo de Profil -->
+      <label for="profilePicture">Photo de Profil :</label>
+      <input type="file" id="profilePicture" name="profilePicture">
+    </br></br>
+      <!-- Champ Pseudo -->
+      <label for="nickname">Pseudo :</label>
+      <input type="text" id="nickname" name="nickname" placeholder="Entrez votre pseudo" value="<%= user.username %>">
+    </br></br>
+      <button type="submit">Enregistrer les Changements</button>
+    </form>
+  </div>
+
+  <!-- Pop-up Messages -->
+  <div id="popup" class="hidden">
+    <div id="popup-message"></div>
+    <div id="popup-progress-bar"></div>
+  </div>
+
+  <script>
+    // Gérer la soumission du formulaire de personnalisation
+    document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      try {
+        const response = await fetch('/user/update', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          showPopup(data.message, true); // Afficher un pop-up vert
+        } else {
+          showPopup(data.message, false); // Afficher un pop-up rouge
+        }
+      } catch (err) {
+        showPopup("Une erreur est survenue.", false); // Afficher un pop-up rouge en cas d'erreur serveur
+      }
+    });
+
+    // Afficher les messages de confirmation
+    function showPopup(message, isSuccess) {
+      const popup = document.getElementById('popup');
+      const popupMessage = document.getElementById('popup-message');
+      const progressBar = document.getElementById('popup-progress-bar');
+
+      popupMessage.textContent = message;
+      popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336'; // Vert pour succès, rouge pour erreur
+      popup.classList.remove('hidden');
+
+      let width = 100;
+      const interval = setInterval(() => {
+        if (width <= 0) {
+          clearInterval(interval);
+          popup.classList.add('hidden');
+        } else {
+          width -= 0.25; // Progression sur 4 secondes
+          progressBar.style.width = width + '%';
+        }
+      }, 10);
+    }
+
+    // Gérer les messages depuis le serveur
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const message = urlParams.get('message');
+
+    if (success && message) {
+      showPopup(message, success === 'true');
+    }
+  </script>
+</body>
+</html>

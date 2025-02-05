@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height:auto;
+      width:fit-content;
+      padding:5%;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input {
+      margin: 10px 0;
+      padding: 10px;
+      width: 250px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+    }
+    #ins {
+      color: #ff6f61 
+    }
+  </style>
+  <header>
+    <h1>ActuVillon</h1>
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <a href="/login">Connexion</a>
+    </nav>
+  </header>
+
+  <div class="container register-container">
+    <h2>Inscription</h2>
+    <form id="registerForm">
+      <label for="email">Adresse Email :</label>
+      <input type="email" id="email" name="email" placeholder="Entrez votre email" required>
+
+      <label for="username">Nom d'utilisateur :</label>
+      <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+
+      <label for="password">Mot de passe :</label>
+      <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+
+      <button type="submit">S'inscrire</button>
+    </form>
+
+    <!-- Pop-up Messages -->
+    <div id="popup" class="hidden">
+      <div id="popup-message"></div>
+      <div id="popup-progress-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    // Gérer la soumission du formulaire d'inscription
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          showPopup(result.message, true); // Afficher un pop-up vert
+          setTimeout(() => window.location.href = result.redirect, 4000); // Rediriger après 4 secondes
+        } else {
+          showPopup(result.message, false); // Afficher un pop-up rouge
+        }
+      } catch (err) {
+        showPopup("Une erreur est survenue.", false); // Afficher un pop-up rouge en cas d'erreur
+      }
+    });
+
+    // Afficher les messages de confirmation
+    function showPopup(message, isSuccess) {
+      const popup = document.getElementById('popup');
+      const popupMessage = document.getElementById('popup-message');
+      const progressBar = document.getElementById('popup-progress-bar');
+
+      popupMessage.textContent = message;
+      popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336';
+      popup.classList.remove('hidden');
+
+      let width = 100;
+      const interval = setInterval(() => {
+        if (width <= 0) {
+          clearInterval(interval);
+          popup.classList.add('hidden');
+        } else {
+          width -= 0.25; // Progression sur 4 secondes
+          progressBar.style.width = width + '%';
+        }
+      }, 10);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer un Post - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+  <!-- Include TinyMCE -->
+  <script src="https://cdn.tiny.cloud/1/hlymuftyaqubaqi84bglbpd6bfvcsq1oswkkatpnc0c50iwz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({
+      selector: '#editor',
+      plugins: 'advlist autolink lists link image charmap print preview anchor',
+      toolbar: 'undo redo | bold italic underline | fontfamily fontsize | forecolor backcolor | alignleft aligncenter alignright | bullist numlist outdent indent | link image',
+      height: 500,
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ActuVillon</h1>
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <a href="/logout">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container post-upload">
+    <h2>Créer un Nouvel Article</h2>
+    <form id="postForm" class="centered-form">
+      <input type="text" name="title" placeholder="Titre" required>
+      <textarea id="editor" name="content" placeholder="Écrivez votre article ici..."></textarea>
+      <button type="submit">Publier l'article</button>
+    </form>
+  </div>
+
+  <!-- Pop-up Messages -->
+  <div id="popup" class="hidden">
+    <div id="popup-message"></div>
+    <div id="popup-progress-bar"></div>
+  </div>
+
+  <script>
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      const response = await fetch('/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showPopup(data.message, true); // Afficher un pop-up vert
+        setTimeout(() => window.location.href = '/', 4000); // Rediriger après 4 secondes
+      } else {
+        showPopup(data.message, false); // Afficher un pop-up rouge
+      }
+    });
+
+    // Afficher les messages de confirmation
+    function showPopup(message, isSuccess) {
+      const popup = document.getElementById('popup');
+      const popupMessage = document.getElementById('popup-message');
+      const progressBar = document.getElementById('popup-progress-bar');
+      popupMessage.textContent = message;
+      popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336'; // Vert pour succès, rouge pour erreur
+      popup.classList.remove('hidden');
+      let width = 100;
+      const interval = setInterval(() => {
+        if (width <= 0) {
+          clearInterval(interval);
+          popup.classList.add('hidden');
+        } else {
+          width -= 0.25; // Progression sur 4 secondes
+          progressBar.style.width = width + '%';
+        }
+      }, 10);
+    }
+
+    // Gérer les messages depuis le serveur
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const message = urlParams.get('message');
+
+    if (success && message) {
+      showPopup(message, success === 'true');
+    }
+  </script>
+</body>
+</html>

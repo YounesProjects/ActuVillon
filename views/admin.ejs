@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de Bord Admin - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>ActuVillon</h1>
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <a href="/logout">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container admin-dashboard">
+    <h2>Tableau de Bord Admin</h2>
+    <div class="admin-actions">
+      <a href="/create-post" class="admin-action-button">Créer un Nouvel Article</a>
+      <a href="/update-user-role" class="admin-action-button">Modifier le Rôle d'un Utilisateur</a>
+    </div>
+  </div>
+  <!-- Pop-up Messages -->
+<div id="popup" class="hidden">
+  <div id="popup-message"></div>
+  <div id="popup-progress-bar"></div>
+</div>
+
+<script>
+  // Afficher les messages de confirmation
+  function showPopup(message, isSuccess) {
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    const progressBar = document.getElementById('popup-progress-bar');
+
+    popupMessage.textContent = message;
+    popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336'; // Vert pour succès, rouge pour erreur
+    popup.classList.remove('hidden');
+
+    let width = 100;
+    const interval = setInterval(() => {
+      if (width <= 0) {
+        clearInterval(interval);
+        popup.classList.add('hidden');
+      } else {
+        width -= 0.25; // Progression sur 4 secondes
+        progressBar.style.width = width + '%';
+      }
+    }, 10);
+  }
+
+  // Gérer les messages depuis le serveur
+  const urlParams = new URLSearchParams(window.location.search);
+  const success = urlParams.get('success');
+  const message = urlParams.get('message');
+
+  if (success && message) {
+    showPopup(message, success === 'true');
+  }
+</script>
+</body>
+</html>

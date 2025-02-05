@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= post.title %> - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <% if (user && user.profilePicture) { %>
+        <a href="/user">
+          <img src="<%= user.profilePicture %>" alt="Photo de Profil" class="user-logo">
+        </a>
+      <% } else { %>
+        <a href="/login">
+          <img src="/images/default-avatar.png" alt="Avatar par Défaut" class="user-logo">
+        </a>
+      <% } %>
+    </div>
+
+    <h1>ActuVillon</h1>
+
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <% if (user) { %>
+        <a href="/logout">Déconnexion</a>
+        <% if (user.isAdmin) { %>
+          <a href="/admin">Créer un Post</a>
+        <% } %>
+      <% } else { %>
+        <a href="/register">Inscription</a>
+        <a href="/login">Connexion</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <div class="container post-page">
+    <h2><%= post.title %></h2>
+    <p>Publié par 
+      <span class="nickname <%= post.author.isAdmin ? 'admin-rainbow' : 'custom-color' %>" style="--nickname-color: <%= post.author.nicknameColor %>;">
+        <%= post.author.username %>
+      </span>
+    </p>
+    <div class="post-content">
+      <%- post.content %>
+    </div>
+
+    <!-- Section des Commentaires -->
+    <div class="comments-section">
+      <h3>Commentaires</h3>
+      <% if (post.comments.length > 0) { %>
+        <% post.comments.forEach(comment => { %>
+          <div class="comment">
+            <div class="comment-header">
+              <img src="<%= comment.user.profilePicture %>" alt="Avatar" class="comment-avatar">
+              <strong>
+                <span class="nickname <%= comment.user.isAdmin ? 'admin-rainbow' : 'custom-color' %>" style="--nickname-color: <%= comment.user.nicknameColor %>;">
+                  <%= comment.user.username %>
+                </span>
+              </strong>
+            </div>
+            <p class="comment-text"><%= comment.text %></p>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>Aucun commentaire pour le moment.</p>
+      <% } %>
+    </div>
+
+    <!-- Formulaire pour Ajouter un Commentaire -->
+    <% if (user) { %>
+      <form id="addCommentForm">
+        <textarea id="commentText" placeholder="Ajoutez un commentaire..." required></textarea>
+        <button type="submit">Envoyer</button>
+      </form>
+    <% } else { %>
+      <p>Connectez-vous pour ajouter un commentaire.</p>
+    <% } %>
+  </div>
+
+  <!-- Pop-up Messages -->
+  <div id="popup" class="hidden">
+    <div id="popup-message"></div>
+    <div id="popup-progress-bar"></div>
+  </div>
+
+  <script>
+    // Gérer l'ajout de commentaires
+    document.getElementById('addCommentForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = document.getElementById('commentText').value;
+
+      try {
+        const response = await fetch(`/posts/<%= post._id %>/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          showPopup(data.message, true); // Afficher un pop-up vert
+          setTimeout(() => window.location.reload(), 4000); // Recharger la page après 4 secondes
+        } else {
+          showPopup(data.message, false); // Afficher un pop-up rouge
+        }
+      } catch (err) {
+        showPopup("Une erreur est survenue.", false); // Afficher un pop-up rouge en cas d'erreur
+      }
+    });
+
+    // Afficher les messages de confirmation
+    function showPopup(message, isSuccess) {
+      const popup = document.getElementById('popup');
+      const popupMessage = document.getElementById('popup-message');
+      const progressBar = document.getElementById('popup-progress-bar');
+
+      popupMessage.textContent = message;
+      popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336'; // Vert pour succès, rouge pour erreur
+      popup.classList.remove('hidden');
+
+      let width = 100;
+      const interval = setInterval(() => {
+        if (width <= 0) {
+          clearInterval(interval);
+          popup.classList.add('hidden');
+        } else {
+          width -= 0.25; // Progression sur 4 secondes
+          progressBar.style.width = width + '%';
+        }
+      }, 10);
+    }
+
+    // Gérer les messages depuis le serveur
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const message = urlParams.get('message');
+
+    if (success && message) {
+      showPopup(message, success === 'true');
+    }
+  </script>
+</body>
+</html>

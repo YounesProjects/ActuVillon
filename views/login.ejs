@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - ActuVillon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="/">
+        <img src="/images/default-avatar.png" alt="Logo ActuVillon" class="user-logo">
+      </a>
+    </div>
+    <h1>ActuVillon</h1>
+    <nav>
+      <a href="/">Retour au Blog</a>
+      <a href="/register">Inscription</a>
+    </nav>
+  </header>
+
+  <div class="container login-container">
+    <h2>Connexion</h2>
+    <form id="loginForm">
+      <label for="username">Nom d'utilisateur :</label>
+      <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+
+      <label for="password">Mot de passe :</label>
+      <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+
+      <button type="submit">Se Connecter</button>
+    </form>
+
+   <!-- Pop-up Messages -->
+<div id="popup" class="hidden">
+  <div id="popup-message"></div>
+  <div id="popup-progress-bar"></div>
+</div>
+
+<script>
+  // Afficher les messages de confirmation
+  function showPopup(message, isSuccess) {
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    const progressBar = document.getElementById('popup-progress-bar');
+
+    popupMessage.textContent = message;
+    popup.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336'; // Vert pour succès, rouge pour erreur
+    popup.classList.remove('hidden');
+
+    let width = 100;
+    const interval = setInterval(() => {
+      if (width <= 0) {
+        clearInterval(interval);
+        popup.classList.add('hidden');
+      } else {
+        width -= 0.25; // Progression sur 4 secondes
+        progressBar.style.width = width + '%';
+      }
+    }, 10);
+  }
+
+  // Gérer les messages depuis le serveur
+  const urlParams = new URLSearchParams(window.location.search);
+  const success = urlParams.get('success');
+  const message = urlParams.get('message');
+
+  if (success && message) {
+    showPopup(message, success === 'true');
+  }
+</script>
+<script>
+    // Gérer la soumission du formulaire de connexion
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const { username, password } = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          showPopup(data.message, true); // Afficher un pop-up vert
+          setTimeout(() => window.location.href = data.redirect, 4000); // Rediriger après 4 secondes
+        } else {
+          showPopup(data.message, false); // Afficher un pop-up rouge
+        }
+      } catch (err) {
+        showPopup("Une erreur est survenue.", false); // Afficher un pop-up rouge en cas d'erreur serveur
+      }
+    });
+  </script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const { username, password } = Object.fromEntries(formData);
+  
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+  
+        const data = await response.json();
+        if (response.ok) {
+          showPopup(data.message, true); // Afficher un pop-up vert
+          setTimeout(() => window.location.href = data.redirect, 3000); // Rediriger après 3 secondes
+        } else {
+          showPopup(data.message, false); // Afficher un pop-up rouge
+        }
+      } catch (err) {
+        showPopup("Une erreur est survenue.", false); // Afficher un pop-up rouge en cas d'erreur
+      }
+    });
+  </script>
+</body>
+</html>
