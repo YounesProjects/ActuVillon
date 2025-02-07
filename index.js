@@ -395,3 +395,57 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Serveur en cours d'exécution sur le port ${PORT}`);
 });
+
+// Ajout de routes dans index.js
+app.delete('/posts/:postId/comments/:commentId', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user.isAdmin) return res.status(403).json({ message: 'Accès refusé' });
+    await Post.findByIdAndUpdate(req.params.postId, { $pull: { comments: { _id: req.params.commentId } } });
+    res.json({ message: 'Commentaire supprimé' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+app.delete('/admin/ban/:userId/:postId/:commentId', verifyToken, async (req, res) => {
+  try {
+    const admin = await User.findById(req.userId);
+    if (!admin.isAdmin) return res.status(403).json({ message: 'Accès refusé' });
+    await User.findByIdAndDelete(req.params.userId);
+    await Post.findByIdAndUpdate(req.params.postId, { $pull: { comments: { _id: req.params.commentId } } });
+    res.json({ message: 'Utilisateur banni et commentaire supprimé' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+app.post('/edit-post/:id', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user.isAdmin) return res.status(403).send('Accès refusé.');
+
+    const { title, content } = req.body;
+    const post = await Post.findByIdAndUpdate(req.params.id, { title, content });
+
+    if (!post) return res.status(404).send('Article non trouvé.');
+
+    res.redirect(`/post/${req.params.id}`);
+  } catch (err) {
+    res.status(500).send('Erreur serveur.');
+  }
+});
+
+app.get('/edit-post/:id', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user.isAdmin) return res.status(403).send('Accès refusé.');
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).send('Article non trouvé.');
+
+    res.render('edit-post', { user, post });
+  } catch (err) {
+    res.status(500).send('Erreur serveur.');
+  }
+});

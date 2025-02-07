@@ -48,6 +48,11 @@
     <div class="post-content">
       <%- post.content %>
     </div>
+    <% if (user && user.isAdmin) { %>
+      <div class="admin-edit">
+        <button onclick="editPost('<%= post._id %>')">Modifier l'article</button>
+      </div>
+    <% } %>
 
     <!-- Section des Commentaires -->
     <div class="comments-section">
@@ -58,10 +63,17 @@
             <div class="comment-header">
               <img src="<%= comment.user.profilePicture %>" alt="Avatar" class="comment-avatar">
               <strong>
-                <span class="nickname <%= comment.user.isAdmin ? 'admin-rainbow' : 'custom-color' %>" style="--nickname-color: <%= comment.user.nicknameColor %>;">
-                  <%= comment.user.username %>
-                </span>
+                <span class="nickname <%= comment.user.isAdmin ? 'admin-rainbow' : 'custom-color' %>" style="--nickname-color: <%= comment.user.nicknameColor %>;"><%= comment.user.username %></span>
               </strong>
+              <% if (user && user.isAdmin) { %>
+                <div class="admin-actions">
+                  <button class="more-options" onclick="toggleOptions(this)">...</button>
+                  <div class="options-menu hidden">
+                    <button class="delete-btn" onclick="deleteComment('<%= post._id %>', '<%= comment._id %>')">Supprimer</button>
+                    <button class="ban-btn" onclick="banUser('<%= comment.user._id %>', '<%= post._id %>', '<%= comment._id %>')">Bannir & Supprimer</button>
+                  </div>
+                </div>
+              <% } %>
             </div>
             <p class="comment-text"><%= comment.text %></p>
           </div>
@@ -143,6 +155,71 @@
     if (success && message) {
       showPopup(message, success === 'true');
     }
-  </script>
+
+    function toggleOptions(button) {
+    const menu = button.nextElementSibling;
+    menu.classList.toggle('hidden');
+  }
+
+  async function deleteComment(postId, commentId) {
+    await fetch(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
+    location.reload();
+  }
+
+  async function banUser(userId, postId, commentId) {
+    await fetch(`/admin/ban/${userId}/${postId}/${commentId}`, { method: 'DELETE' });
+    location.reload();
+  }
+</script>
+
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  function toggleOptions(button) {
+    const menu = button.nextElementSibling;
+    menu.classList.toggle('hidden');
+  }
+
+  async function deleteComment(postId, commentId) {
+    await fetch(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
+    location.reload();
+  }
+
+  async function banUser(userId, postId, commentId) {
+    await fetch(`/admin/ban/${userId}/${postId}/${commentId}`, { method: 'DELETE' });
+    location.reload();
+  }
+
+  function editPost(postId) {
+    window.location.href = `/edit-post/${postId}`;
+  }
+</script>
+
+<style>
+  .hidden {
+    display: none;
+  }
+  .admin-edit {
+    margin-top: 20px;
+  }
+  .admin-edit button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .admin-edit button:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+
+
 </body>
 </html>
