@@ -28,6 +28,7 @@ app.use(express.static('public'));
 app.use(fileUpload()); // Middleware pour gérer les uploads de fichiers
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Se connecter à MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

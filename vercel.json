@@ -7,10 +7,10 @@
       }
     ],
     "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/index.js"
-      }
+      
+        {"src": "/(.*)", "dest": "/index.js"},
+        { "src": "/styles.css", "dest": "/styles.css" },
+        { "src": "/images/(.*)", "dest": "/images/$1" }
     ]
   }
   
