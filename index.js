@@ -26,6 +26,7 @@ app.use(cookieParser());
 app.use(express.static('public'));
 app.use(fileUpload()); // Middleware pour gérer les uploads de fichiers
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Se connecter à MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
