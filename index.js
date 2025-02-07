@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const fileUpload = require('express-fileupload'); // Pour traiter les uploads de fichiers
 const cloudinary = require('cloudinary').v2;
+const path = require('path');
 
 // Charger les variables d'environnement
 dotenv.config();
