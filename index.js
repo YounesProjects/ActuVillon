@@ -10,6 +10,7 @@ const fileUpload = require('express-fileupload'); // Pour traiter les uploads de
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 
+
 // Charger les variables d'environnement
 dotenv.config();
 
@@ -461,16 +462,3 @@ app.post('/edit-post/:id', verifyToken, async (req, res) => {
     res.status(500).send('Erreur serveur.');
   }
 });
-
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { Analytics } from "@vercel/analytics/react"; // 🔥 Importer Vercel Analytics
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <App />
-    <Analytics /> {/* 🔥 Ajouter Analytics ici */}
-  </React.StrictMode>
-);
