@@ -29,6 +29,7 @@ app.use(fileUpload()); // Middleware pour gérer les uploads de fichiers
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Se connecter à MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -420,32 +421,43 @@ app.delete('/admin/ban/:userId/:postId/:commentId', verifyToken, async (req, res
   }
 });
 
-app.post('/edit-post/:id', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (!user.isAdmin) return res.status(403).send('Accès refusé.');
-
-    const { title, content } = req.body;
-    const post = await Post.findByIdAndUpdate(req.params.id, { title, content });
-
-    if (!post) return res.status(404).send('Article non trouvé.');
-
-    res.redirect(`/post/${req.params.id}`);
-  } catch (err) {
-    res.status(500).send('Erreur serveur.');
-  }
-});
-
+// Route GET pour afficher la page d'édition d'un article
 app.get('/edit-post/:id', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    if (!user.isAdmin) return res.status(403).send('Accès refusé.');
+    if (!user || !user.isAdmin) {
+      return res.status(403).send('Accès refusé.');
+    }
 
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).send('Article non trouvé.');
+    if (!post) {
+      return res.status(404).send('Article non trouvé.');
+    }
 
     res.render('edit-post', { user, post });
   } catch (err) {
+    console.error(err);
+    res.status(500).send('Erreur serveur.');
+  }
+});
+// Route POST pour enregistrer les modifications
+app.post('/edit-post/:id', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).send('Accès refusé.');
+    }
+
+    const { title, content } = req.body;
+    const post = await Post.findByIdAndUpdate(req.params.id, { title, content }, { new: true });
+
+    if (!post) {
+      return res.status(404).send('Article non trouvé.');
+    }
+
+    res.redirect(`/post/${req.params.id}`); // Redirige vers l'article mis à jour
+  } catch (err) {
+    console.error(err);
     res.status(500).send('Erreur serveur.');
   }
 });
